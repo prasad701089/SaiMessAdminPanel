@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mess Admin Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 380px;
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 26px;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .input-box {
+            margin-bottom: 20px;
+        }
+
+        .input-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #444;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            outline: none;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .input-box input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 6px rgba(99,102,241,0.4);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #4338ca;
+        }
+
+        .error {
+            font-size: 14px;
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Mess Admin Login</h2>
+
+    <form id="loginForm">
+
+        <div class="input-box">
+            <label for="adminId">Admin ID</label>
+            <input type="text" id="adminId" placeholder="Enter admin ID" required>
+        </div>
+
+        <div class="input-box">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+
+        <div id="errorMsg" class="error">Invalid Admin ID or Password</div>
+    </form>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const id = document.getElementById("adminId").value.trim();
+        const pass = document.getElementById("password").value.trim();
+        const errorMsg = document.getElementById("errorMsg");
+
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: `adminId=${id}&password=${pass}`
+        });
+
+        const result = await response.text();
+
+        if (result === "success") {
+            window.location.href = "/dashboard";
+        } else {
+            errorMsg.style.display = "block";
+        }
+    });
+</script>
+
+</body>
+</html>

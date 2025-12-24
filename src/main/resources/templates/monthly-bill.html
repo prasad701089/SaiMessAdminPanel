@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Monthly Bill</title>
+    <style>
+        body{font-family:Poppins;background:#f4f6f8;padding:30px}
+        .card{
+            max-width:500px;
+            background:#fff;
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 10px 30px rgba(0,0,0,.08)
+        }
+        h2{margin-bottom:10px}
+        .bill{font-size:18px;margin:15px 0}
+        .total{font-size:22px;font-weight:700;color:#0a8}
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Monthly Tiffin Bill</h2>
+
+    <div class="bill">
+        <strong>Details:</strong>
+        <span th:text="${billDetails}"></span>
+    </div>
+
+    <div class="total">
+        Total: ₹<span th:text="${totalAmount}"></span>
+    </div>
+</div>
+
+</body>
+</html>
