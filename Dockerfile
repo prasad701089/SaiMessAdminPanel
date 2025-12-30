@@ -1,20 +1,24 @@
-# Stage 1: Build the JAR
+# ---------- STAGE 1: BUILD ----------
 FROM maven:3.9.6-eclipse-temurin-17 AS build
+
 WORKDIR /app
 
-# Copy pom.xml and download dependencies first (cache layer)
+# Cache dependencies
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Copy the rest of the source code
+# Copy source and build
 COPY src ./src
-
-# Build the application
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the app
-FROM openjdk:17-jdk-slim
-VOLUME /tmp
+
+# ---------- STAGE 2: RUN ----------
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
 COPY --from=build /app/target/*.jar app.jar
 
-ENTRYPOINT ["java","-Dserver.port=${PORT}","-jar","/app.jar"]
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","app.jar"]
