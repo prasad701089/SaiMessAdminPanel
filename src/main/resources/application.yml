@@ -1,4 +1,8 @@
 spring:
+  application:
+    name: SaiMessAdminPanel
+  profiles:
+    active: dev
   datasource:
     url: jdbc:postgresql://dpg-d5ajenjuibrs73btcpeg-a.oregon-postgres.render.com:5432/smap_w0ml
     username: root
