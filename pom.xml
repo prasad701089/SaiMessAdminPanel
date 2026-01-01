@@ -163,7 +163,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>TMS</finalName>
+		<finalName>SaiMessAdminPanel</finalName>
 	</build>
 
 
