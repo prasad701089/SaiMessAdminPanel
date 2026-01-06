@@ -1,0 +1,15 @@
+com\saiadmin\SaiMessAdminPanel\repository\UserRepository.class
+com\saiadmin\SaiMessAdminPanel\repository\DailySummaryRepository.class
+com\saiadmin\SaiMessAdminPanel\entity\User.class
+com\saiadmin\SaiMessAdminPanel\repository\DailyRecordRepository.class
+com\saiadmin\SaiMessAdminPanel\controller\LoginController.class
+com\saiadmin\SaiMessAdminPanel\entity\Admin.class
+com\saiadmin\SaiMessAdminPanel\repository\AdminRepository.class
+com\saiadmin\SaiMessAdminPanel\entity\DailySummary.class
+com\saiadmin\SaiMessAdminPanel\controller\UserController.class
+com\saiadmin\SaiMessAdminPanel\SaiMessAdminPanelApplication.class
+com\saiadmin\SaiMessAdminPanel\service\AdminService.class
+com\saiadmin\SaiMessAdminPanel\service\MessRecordService.class
+com\saiadmin\SaiMessAdminPanel\config\DataLoader.class
+com\saiadmin\SaiMessAdminPanel\restcontroller\MessRecordController.class
+com\saiadmin\SaiMessAdminPanel\entity\DailyRecord.class

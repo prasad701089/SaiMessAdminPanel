@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mess Dashboard</title>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+        }
+
+        .topbar {
+            background: #4f46e5;
+            padding: 18px 30px;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .logout-btn {
+            margin-left: 15px;
+            padding: 6px 12px;
+            background: #ef4444; /* red color */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+.logout-btn:hover {
+    background: #dc2626; /* darker red on hover */
+}
+
+
+        .container {
+            padding: 25px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        th {
+            background: #eef2ff;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        select, input {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+
+       .bill {
+            font-weight: 700;
+            font-size: 16px;
+            color: #4f46e5;       /* Main theme color */
+            background: #eef2ff;  /* Light background for bill cells */
+            border-radius: 6px;
+       }
+        .mor-bill {
+            background-color: #e0f2ff; /* light blue for morning */
+        }
+        .night-bill {
+            background-color: #f3e8ff; /* light purple for night */
+        }
+        .total-bill {
+            background-color: #d1fae5; /* light green for total */
+        }
+
+
+        .save-btn {
+            margin-top: 25px;
+            padding: 14px 25px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div>Mess Dashboard</div>
+
+
+    <div>
+        Welcome, <span th:text="${session.admin}"></span>
+        <a href="/users"
+           style="padding:8px 14px;background:#007bff;color:#fff;border-radius:6px;text-decoration:none">
+            👤 Manage Users
+        </a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Add New User</h2>
+
+
+
+    <!-- SUMMARY CARDS -->
+    <div th:if="${hasSummary}" class="cards">
+        <div class="card">
+            <h3>Morning Tiffins</h3>
+            <div class="value" id="totalMorning" th:text="${totalMorning}">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Night Tiffins</h3>
+            <div class="value" id="totalNight" th:text="${totalNight}">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Total Collection</h3>
+            <div class="value" id="totalCollection" th:text="${'₹'+totalCollection}">₹0</div>
+        </div>
+    </div>
+
+    <div th:unless="${hasSummary}" class="card" style="margin-bottom:20px;">
+        <h3>No entries for today yet</h3>
+        <p>Once at least one user submits today's record, the summary (morning/night/collection) will be shown here.</p>
+    </div>
+
+    <!-- USER MEAL TABLE -->
+    <table>
+        <thead>
+        <tr>
+            <th>User</th>
+
+            <th>Morning</th>
+            <th>M Rate</th>
+            <th>M Qty</th>
+            <th class="bill">M Bill</th>
+
+            <th>Night</th>
+            <th>N Rate</th>
+            <th>N Qty</th>
+            <th class="bill">N Bill</th>
+
+            <th class="bill">Total</th>
+        </tr>
+        </thead>
+
+        <tbody id="userTable">
+        <!-- DYNAMIC ROWS -->
+        <tr th:each="user : ${userList}" th:data-user-id="${user.id}" th:with="r=${todayRecordsMap[user.id]}">
+            <td th:text="${user.name}">User Name</td>
+
+            <td>
+                <select class="mor-status">
+                    <option value="no" th:selected="${r == null or r.morningStatus != 'yes'}">No</option>
+                    <option value="yes" th:selected="${r != null and r.morningStatus == 'yes'}">Yes</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="mor-rate" th:disabled="${r == null or r.morningStatus != 'yes'}">
+                    <option value="40" th:selected="${r != null and r.morningRate == 40}">40</option>
+                    <option value="50" th:selected="${r != null and r.morningRate == 50}">50</option>
+                    <option value="60" th:selected="${r != null and r.morningRate == 60}">60</option>
+                </select>
+            </td>
+
+            <td><input type="number" class="mor-qty" th:value="${r != null ? r.morningQuantity : 1}" min="1" th:disabled="${r == null or r.morningStatus != 'yes'}"></td>
+            <td class="mor-bill bill" th:text="${r != null ? '₹' + r.morningBill : '₹0'}">₹0</td>
+
+            <td>
+                <select class="night-status">
+                    <option value="no" th:selected="${r == null or r.nightStatus != 'yes'}">No</option>
+                    <option value="yes" th:selected="${r != null and r.nightStatus == 'yes'}">Yes</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="night-rate" th:disabled="${r == null or r.nightStatus != 'yes'}">
+                    <option value="40" th:selected="${r != null and r.nightRate == 40}">40</option>
+                    <option value="50" th:selected="${r != null and r.nightRate == 50}">50</option>
+                    <option value="60" th:selected="${r != null and r.nightRate == 60}">60</option>
+                </select>
+            </td>
+
+            <td><input type="number" class="night-qty" th:value="${r != null ? r.nightQuantity : 1}" min="1" th:disabled="${r == null or r.nightStatus != 'yes'}"></td>
+            <td class="night-bill bill" th:text="${r != null ? '₹' + r.nightBill : '₹0'}">₹0</td>
+
+            <td class="total-bill bill" th:text="${r != null ? '₹' + r.totalBill : '₹0'}">₹0</td>
+        </tr>
+        </tbody>
+
+    </table>
+
+    <div style="display:flex; align-items:center; gap:12px; margin-top:16px;">
+        <div>
+            <label for="entryDate" style="font-weight:600;margin-right:6px;">Entry date:</label>
+            <input id="entryDate" type="date" th:value="${selectedEntryDate}" />
+        </div>
+        <button class="save-btn" onclick="saveRecords()">Save Records</button>
+    </div>
+
+    <!-- MONTHLY HISTORY GRID -->
+    <div style="margin-top:30px;">
+        <h3>
+            Monthly History — <span th:text="${monthYearLabel}"></span>
+            <span style="margin-left:12px;font-size:14px;color:#6b7280;">(select month)</span>
+        </h3>
+
+        <div style="margin:8px 0 14px; display:flex; gap:8px; align-items:center;">
+            <button type="button" onclick="adjustMonth(-1)" style="padding:6px 10px;border-radius:6px;">◀ Prev</button>
+            <input id="monthPicker" type="month" th:value="${selectedMonthValue}" />
+            <button type="button" onclick="adjustMonth(1)" style="padding:6px 10px;border-radius:6px;">Next ▶</button>
+            <button type="button" onclick="goToToday()" style="padding:6px 10px;border-radius:6px;">This month</button>
+        </div>
+
+        <div style="overflow:auto;">
+            <table>
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th th:each="d : ${monthDays}" th:text="${d}">1</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${userList}" th:data-user-id="${user.id}">
+                    <td th:text="${user.name}">User Name</td>
+                    <td th:each="d : ${monthDays}" th:with="cell=${monthlyMap != null and monthlyMap.get(user.id) != null ? monthlyMap.get(user.id).get(d) : null}">
+                        <div th:if="${cell != null}" style="font-size:12px;padding:6px;">
+                            <span th:if="${cell.morningStatus == 'yes'}" th:text="${'M:' + cell.morningRate + 'x' + cell.morningQuantity}">M:40x1</span>
+                            <span th:if="${cell.nightStatus == 'yes'}" style="margin-left:6px;" th:text="${'N:' + cell.nightRate + 'x' + cell.nightQuantity}">N:50x2</span>
+                            <div th:text="${'₹' + (cell.totalBill)}" style="font-weight:600;color:#4f46e5;margin-top:4px;">₹0</div>
+                        </div>
+                        <div th:if="${cell == null}" style="color:#94a3b8;font-size:12px;">-</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <table border="1" width="100%">
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Select Month</th>
+            <th>View Bill</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="user : ${userList}">
+            <td th:text="${user.name}">User Name</td>
+
+            <!-- MONTH SELECT + BUTTON -->
+            <td colspan="2">
+                <form th:action="@{/monthly-bill/{id}(id=${user.id})}" method="get"
+                      style="display:flex;gap:8px;align-items:center">
+
+                    <!-- Month -->
+                    <select name="month" required>
+                        <option value="1">Jan</option>
+                        <option value="2">Feb</option>
+                        <option value="3">Mar</option>
+                        <option value="4">Apr</option>
+                        <option value="5">May</option>
+                        <option value="6">Jun</option>
+                        <option value="7">Jul</option>
+                        <option value="8" >Aug</option>
+                        <option value="9">Sep</option>
+                        <option value="10">Oct</option>
+                        <option value="11" >Nov</option>
+                        <option value="12" selected>Dec</option>
+                    </select>
+
+                    <!-- Year -->
+                    <input type="number" name="year" value="2025"
+                           style="width:80px" required />
+
+                    <!-- Button -->
+                    <button type="submit">
+                        View Bill
+                    </button>
+
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+<script>
+    function logout() {
+    // Redirect to backend logout endpoint
+    window.location.href = "/logout";
+    }
+
+    function updateTotals() {
+        let totalMorning = 0;
+        let totalNight = 0;
+        let totalCollection = 0;
+
+        document.querySelectorAll("#userTable tr").forEach(row => {
+
+            // ---------- MORNING ----------
+            const mStatus = row.querySelector(".mor-status").value;
+            const mRate = parseInt(row.querySelector(".mor-rate").value) || 0;
+            const mQty = parseInt(row.querySelector(".mor-qty").value) || 0;
+            const mBillCell = row.querySelector(".mor-bill");
+
+            let mBill = 0;
+            if (mStatus === "yes") {
+                mBill = mRate * mQty;
+                totalMorning += mQty;
+                row.querySelector(".mor-rate").disabled = false;
+                row.querySelector(".mor-qty").disabled = false;
+            } else {
+                row.querySelector(".mor-rate").disabled = true;
+                row.querySelector(".mor-qty").disabled = true;
+            }
+            mBillCell.textContent = "₹" + mBill; // live UI update
+
+            // ---------- NIGHT ----------
+            const nStatus = row.querySelector(".night-status").value;
+            const nRate = parseInt(row.querySelector(".night-rate").value) || 0;
+            const nQty = parseInt(row.querySelector(".night-qty").value) || 0;
+            const nBillCell = row.querySelector(".night-bill");
+
+            let nBill = 0;
+            if (nStatus === "yes") {
+                nBill = nRate * nQty;
+                totalNight += nQty;
+                row.querySelector(".night-rate").disabled = false;
+                row.querySelector(".night-qty").disabled = false;
+            } else {
+                row.querySelector(".night-rate").disabled = true;
+                row.querySelector(".night-qty").disabled = true;
+            }
+            nBillCell.textContent = "₹" + nBill; // live UI update
+
+            // ---------- TOTAL BILL PER USER ----------
+            const total = mBill + nBill;
+            row.querySelector(".total-bill").textContent = "₹" + total; // live UI update
+
+            totalCollection += total;
+        });
+
+        document.getElementById("totalMorning").textContent = totalMorning;
+        document.getElementById("totalNight").textContent = totalNight;
+        document.getElementById("totalCollection").textContent = "₹" + totalCollection;
+    }
+
+    // ---------- Add listeners ----------
+    document.addEventListener("change", function (e) {
+        if (
+            e.target.classList.contains("mor-status") ||
+            e.target.classList.contains("mor-rate") ||
+            e.target.classList.contains("mor-qty") ||
+            e.target.classList.contains("night-status") ||
+            e.target.classList.contains("night-rate") ||
+            e.target.classList.contains("night-qty")
+        ) {
+            updateTotals();
+        }
+    });
+
+    updateTotals();
+
+    // ---------- Save API Call ----------
+    function saveRecords() {
+
+        const list = [];
+
+        document.querySelectorAll("#userTable tr").forEach(row => {
+
+            const mStatus = row.querySelector(".mor-status").value;
+            const mRate = parseInt(row.querySelector(".mor-rate").value) || 0;
+            const mQty = parseInt(row.querySelector(".mor-qty").value) || 0;
+            const mBill = mStatus === "yes" ? mRate * mQty : 0;
+
+            const nStatus = row.querySelector(".night-status").value;
+            const nRate = parseInt(row.querySelector(".night-rate").value) || 0;
+            const nQty = parseInt(row.querySelector(".night-qty").value) || 0;
+            const nBill = nStatus === "yes" ? nRate * nQty : 0;
+
+            list.push({
+                user: { id: row.dataset.userId },
+
+                morningStatus: mStatus,
+                morningRate: mRate,
+                morningQuantity: mQty,
+                morningBill: mBill,   // send to backend
+
+                nightStatus: nStatus,
+                nightRate: nRate,
+                nightQuantity: nQty,
+                nightBill: nBill,     // send to backend
+
+                totalBill: mBill + nBill,  // send to backend
+
+                // include selected entry date
+                recordDate: document.getElementById('entryDate').value
+            });
+        });
+
+        fetch("/api/records/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(list)
+        })
+        .then(res => res.text())
+        .then(msg => {
+            alert(msg);
+            // redirect to currently selected month so monthly grid is visible
+            const monthPicker = document.getElementById('monthPicker');
+            const entryDateEl = document.getElementById('entryDate');
+            const monthVal = monthPicker ? monthPicker.value : '';
+            if (monthVal) {
+                const [yy, mm] = monthVal.split('-');
+                window.location.href = '/dashboard?year=' + yy + '&month=' + Number(mm);
+            } else if (entryDateEl && entryDateEl.value) {
+                const d = new Date(entryDateEl.value);
+                const yy = d.getFullYear();
+                const mm = d.getMonth() + 1;
+                window.location.href = '/dashboard?year=' + yy + '&month=' + mm;
+            } else {
+                window.location.reload();
+            }
+        });
+    }
+
+    // ---------- Month picker controls ----------
+    document.getElementById('monthPicker').addEventListener('change', function () {
+        const v = this.value; // yyyy-mm
+        if (!v) return;
+        const [yy, mm] = v.split('-').map(Number);
+        window.location.href = '/dashboard?year=' + yy + '&month=' + mm;
+    });
+
+    function adjustMonth(offset) {
+        const el = document.getElementById('monthPicker');
+        const v = el.value || '';
+        const now = v ? new Date(v + '-01') : new Date();
+        now.setMonth(now.getMonth() + offset);
+        const yr = now.getFullYear();
+        const mon = now.getMonth() + 1;
+        window.location.href = '/dashboard?year=' + yr + '&month=' + mon;
+    }
+
+    function goToToday() {
+        window.location.href = '/dashboard';
+    }
+</script>
+
+
+
+</body>
+</html>
