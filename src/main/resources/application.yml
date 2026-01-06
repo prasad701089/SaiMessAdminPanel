@@ -4,7 +4,7 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://root:wgLJ3ZU7MhCRDOnW9ASZC2VXreElC51A@dpg-d5edgcbuibrs738b7i4g-a.oregon-postgres.render.com:5432/sai_mess
+    url: jdbc:postgresql://dpg-d5edgcbuibrs738b7i4g-a.oregon-postgres.render.com:5432/sai_mess
     username: root
     password: wgLJ3ZU7MhCRDOnW9ASZC2VXreElC51A
     driver-class-name: org.postgresql.Driver
